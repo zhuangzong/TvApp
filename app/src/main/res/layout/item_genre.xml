@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tv_item_genre"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:textSize="12sp"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="3dp"
+    android:layout_marginEnd="12dp"
+    android:focusable="false"
+    android:focusableInTouchMode="false"
+    android:background="@drawable/shape_tag">
+
+</TextView>

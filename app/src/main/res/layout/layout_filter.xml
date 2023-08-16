@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <TextView
+        android:id="@+id/tv_filter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="@string/filter"
+        android:gravity="center"
+        android:drawablePadding="5dp"
+        android:drawableStart="@android:drawable/ic_menu_sort_by_size"
+        android:layout_marginTop="10dp"
+        android:paddingHorizontal="15dp"
+        android:background="@drawable/selector_menu"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_marginStart="50dp"
+        tools:ignore="UseCompatTextViewDrawableXml" />
+</androidx.constraintlayout.widget.ConstraintLayout>

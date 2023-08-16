@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">TvApp</string>
+    <string name="search">Search</string>
+    <string name="home">Home</string>
+    <string name="settings">Settings</string>
+    <string name="language">Profile</string>
+    <string name="recommend">Recommend</string>
+    <string name="movie">Movie</string>
+    <string name="tv">Tv</string>
+    <string name="image_card">image_card</string>
+    <string name="filter">Click hear to filter</string>
+    <string name="genre">Genre</string>
+    <string name="region">Region</string>
+    <string name="year">Year</string>
+    <string name="rating">Rating</string>
+    <string name="audio">Audio</string>
+    <string name="play">PLAY</string>
+
+    <string name="pref_title_settings">App Settings</string>
+    <string name="pref_title_recommendations">Recommendations</string>
+    <string name="pref_key_recommendations">pref_recommendations</string>
+    <string name="pref_key_screen_general">general_settings</string>
+    <string name="pref_title_screen_general">General Settings</string>
+    <string name="pref_key_login">pref_login</string>
+    <string name="pref_title_login">Login</string>
+
+    <string name="exit_title">Confirm Exit</string>
+    <string name="exit_message">Are you sure you want to exit?</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="dialog_example_title">Use Google\'s location service?</string>
+    <string name="dialog_example_description">Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</string>
+    <string name="dialog_example_button_positive">Agree</string>
+    <string name="dialog_example_button_negative">Disagree</string>
+    <string name="dialog_example_button_toast_positive_clicked">\'Agree\' clicked.</string>
+    <string name="dialog_example_button_toast_negative_clicked">\'Disagree\' clicked.</string>
+
+</resources>

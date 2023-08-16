@@ -1,0 +1,58 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace = "org.tvapp"
+    compileSdk = 33
+
+    defaultConfig {
+        applicationId = "org.tvapp"
+        minSdk = 24
+        targetSdk = 33
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
+    buildFeatures {
+        viewBinding = true
+        dataBinding = true
+        buildConfig = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation "com.google.android.material:material:1.8.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+    implementation "androidx.leanback:leanback:1.2.0-alpha02"
+    implementation "androidx.leanback:leanback-tab:1.1.0-beta01"
+    implementation "androidx.leanback:leanback-paging:1.1.0-alpha09"
+    implementation "androidx.leanback:leanback-preference:1.2.0-alpha02"
+    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation "com.squareup.okhttp3:okhttp:4.11.0"
+    implementation "com.github.bumptech.glide:glide:4.13.0"
+    implementation "com.github.bumptech.glide:okhttp3-integration:4.13.0"
+    annotationProcessor "com.github.bumptech.glide:compiler:4.13.0"
+    implementation "com.google.android.exoplayer:exoplayer:2.18.5"
+    implementation "com.google.android.exoplayer:extension-leanback:2.18.5"
+}
