@@ -1,38 +1,24 @@
 package org.tvapp.ui;
 
-import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.leanback.system.Settings;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.FocusHighlight;
-import androidx.leanback.widget.FocusHighlightHelper;
 import androidx.leanback.widget.VerticalGridPresenter;
-import androidx.leanback.widget.VerticalGridView;
 import androidx.viewbinding.ViewBinding;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import org.tvapp.R;
 import org.tvapp.base.BaseFragment;
-import org.tvapp.databinding.DialogFiltersBinding;
 import org.tvapp.databinding.FragmentMovieBinding;
 import org.tvapp.model.DataModel;
 import org.tvapp.presenter.CustomVerticalGridPresenter;
 import org.tvapp.presenter.ImageCardPresenter;
 import org.tvapp.presenter.CategoryPresenter;
 import org.tvapp.utils.Common;
-import org.tvapp.utils.DisplayUtils;
 import org.tvapp.widget.FiltersWidget;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -86,7 +72,7 @@ public class MovieFragment extends BaseFragment {
     }
 
     private void initMovies() {
-        verticalGridPresenter.setNumberOfColumns(5);
+        verticalGridPresenter.setNumberOfColumns(6);
         mGridViewHolder = verticalGridPresenter.onCreateViewHolder(binding.frameContainer);
         binding.frameContainer.addView(mGridViewHolder.view, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
         setGridData(dataModel.getResult().get(0).getDetails());

@@ -25,8 +25,6 @@ public class CategoryPresenter extends Presenter {
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_category, parent, false);
         ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-        layoutParams.width = 270;
-        layoutParams.height = 100;
         view.setLayoutParams(layoutParams);
         return new ViewHolder(view);
     }
@@ -36,7 +34,7 @@ public class CategoryPresenter extends Presenter {
         TextView textView = viewHolder.view.findViewById(R.id.item_text);
         textView.setText((String) item);
         if (selectedCategory.equals(item)) {
-            textView.setTextColor(ContextCompat.getColor(viewHolder.view.getContext(), R.color.bg_grey));
+            textView.setTextColor(ContextCompat.getColor(viewHolder.view.getContext(), R.color.gold));
         } else {
             textView.setTextColor(ContextCompat.getColor(viewHolder.view.getContext(), R.color.white));
         }
