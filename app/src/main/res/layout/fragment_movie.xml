@@ -7,7 +7,7 @@
     tools:context=".ui.MovieFragment">
     <androidx.leanback.widget.BrowseFrameLayout
         android:id="@+id/browse_frame_layout"
-        android:layout_width="150dp"
+        android:layout_width="120dp"
         android:layout_height="match_parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

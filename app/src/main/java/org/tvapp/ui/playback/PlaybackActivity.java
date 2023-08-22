@@ -1,6 +1,7 @@
 package org.tvapp.ui.playback;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -8,7 +9,9 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import org.tvapp.base.BaseActivity;
+import org.tvapp.base.Constants;
 import org.tvapp.databinding.ActivityPlaybackBinding;
+import org.tvapp.db.bean.VideoDetailInfo;
 import org.tvapp.model.DataModel;
 
 public class PlaybackActivity extends BaseActivity {
@@ -20,6 +23,12 @@ public class PlaybackActivity extends BaseActivity {
     private static final float GAMEPAD_TRIGGER_INTENSITY_OFF = 0.45f;
     private boolean gamepadTriggerPressed = false;
 
+    public static void launch(Context activity, VideoDetailInfo data) {
+        Intent intent = new Intent(activity, PlaybackActivity.class);
+        intent.putExtra(Constants.EXTRA_VIDEO, data);
+        activity.startActivity(intent);
+    }
+
     @Override
     protected View provideContentViewId() {
         binding = ActivityPlaybackBinding.inflate(getLayoutInflater());
@@ -30,14 +39,14 @@ public class PlaybackActivity extends BaseActivity {
     public void initView() {
         super.initView();
         Intent intent = getIntent();
-        DataModel.Detail data = (DataModel.Detail) intent.getSerializableExtra("data");
-        PlaybackFragment playbackFragment = new PlaybackFragment();
+        VideoDetailInfo data = (VideoDetailInfo) intent.getSerializableExtra(Constants.EXTRA_VIDEO);
+        mPlaybackFragment = new PlaybackFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable("data", data);
-        playbackFragment.setArguments(bundle);
+        bundle.putSerializable(Constants.EXTRA_VIDEO, data);
+        mPlaybackFragment.setArguments(bundle);
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(binding.playbackControlsFragment.getId(),playbackFragment)
+                .replace(binding.playbackControlsFragment.getId(),mPlaybackFragment)
                 .commit();
     }
 

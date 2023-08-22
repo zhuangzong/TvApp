@@ -67,6 +67,7 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<LeanbackPlayer
     private final PlaybackControlsRow.SkipNextAction mSkipNextAction;
     private final PlaybackControlsRow.FastForwardAction mFastForwardAction;
     private final PlaybackControlsRow.RewindAction mRewindAction;
+    private final PlaybackControlsRow.HighQualityAction mHighQualityAction;
 
     public VideoPlayerGlue(
             Context context,
@@ -86,6 +87,8 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<LeanbackPlayer
         mThumbsDownAction = new PlaybackControlsRow.ThumbsDownAction(context);
         mThumbsDownAction.setIndex(PlaybackControlsRow.ThumbsDownAction.INDEX_OUTLINE);
         mRepeatAction = new PlaybackControlsRow.RepeatAction(context);
+        mHighQualityAction = new PlaybackControlsRow.HighQualityAction(context);
+        setSeekEnabled(true);
     }
 
     @Override
@@ -107,6 +110,7 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<LeanbackPlayer
         adapter.add(mThumbsDownAction);
         adapter.add(mThumbsUpAction);
         adapter.add(mRepeatAction);
+        adapter.add(mHighQualityAction);
     }
 
     @Override
@@ -125,7 +129,8 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<LeanbackPlayer
                 || action == mFastForwardAction
                 || action == mThumbsDownAction
                 || action == mThumbsUpAction
-                || action == mRepeatAction;
+                || action == mRepeatAction
+                || action == mHighQualityAction;
     }
 
     private void dispatchAction(Action action) {

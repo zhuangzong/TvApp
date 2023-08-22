@@ -10,10 +10,16 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.google.gson.Gson;
+
 import org.tvapp.base.BaseActivity;
 import org.tvapp.base.Constants;
 import org.tvapp.databinding.ActivityMainBinding;
+import org.tvapp.db.DatabaseHelper;
+import org.tvapp.db.bean.ParamStruct;
+import org.tvapp.db.callback.OnInitCallback;
 import org.tvapp.ui.GridFragment;
+import org.tvapp.ui.TvFragment;
 import org.tvapp.ui.guided.GuidedActivity;
 import org.tvapp.ui.guided.GuidedFragment;
 import org.tvapp.ui.HomeFragment;
@@ -22,9 +28,11 @@ import org.tvapp.ui.ProfileFragment;
 import org.tvapp.ui.SearchFragment;
 import org.tvapp.ui.guided.OnGuidedActionClickedListener;
 import org.tvapp.ui.settings.SettingsActivity;
+import org.tvapp.utils.Common;
 import org.tvapp.utils.DisplayUtils;
+import org.tvapp.utils.LogUtils;
 
-public class MainActivity extends BaseActivity implements View.OnKeyListener, View.OnClickListener {
+public class MainActivity extends BaseActivity implements View.OnKeyListener, View.OnClickListener, OnInitCallback {
 
     private ActivityMainBinding binding;
     private boolean SIDE_MENU = false;
@@ -40,11 +48,15 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
     @Override
     public void initView() {
         super.initView();
-        // show the first fragment
-        lastSelectedMenu = binding.btnHome;
-        lastSelectedMenu.setActivated(true);
-        lastSelectedMenu.requestFocus();
-        changeFragment(new HomeFragment());
+    }
+
+    @Override
+    public void initData() {
+        super.initData();
+        DatabaseHelper databaseHelper = new DatabaseHelper.Builder(this).setOnInitCallback(this).build();
+        ParamStruct paramStruct = new ParamStruct();
+        paramStruct.setStaticHost("http://192.168.10.45:8000");
+        databaseHelper.callInit(new Gson().toJson(paramStruct));
     }
 
     @Override
@@ -67,9 +79,10 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
 
     @Override
     public boolean onKey(View view, int keyCode, KeyEvent event) {
-        if(event.getAction() != KeyEvent.ACTION_UP) return false;
-        switch (keyCode){
+        if (event.getAction() != KeyEvent.ACTION_UP) return false;
+        switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
+                if (lastSelectedMenu == null) return false;
                 lastSelectedMenu.setActivated(false);
                 lastSelectedMenu = view;
                 view.setActivated(true);
@@ -80,12 +93,12 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
                 } else if (view.getId() == R.id.btn_home) {
                     selectedMenu = Constants.MENU_HOME;
                     changeFragment(new HomeFragment());
-                }else if (view.getId() == R.id.btn_movie) {
+                } else if (view.getId() == R.id.btn_movie) {
                     selectedMenu = Constants.MENU_MOVIE;
                     changeFragment(new MovieFragment());
-                }else if (view.getId() == R.id.btn_tv) {
+                } else if (view.getId() == R.id.btn_tv) {
                     selectedMenu = Constants.MENU_TV;
-                    changeFragment(new GridFragment());
+                    changeFragment(new TvFragment());
                 } else if (view.getId() == R.id.btn_settings) {
                     selectedMenu = Constants.MENU_SETTINGS;
                     startActivity(new Intent(this, SettingsActivity.class));
@@ -101,6 +114,11 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
                     this.SIDE_MENU = true;
                 }
                 break;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                if (this.SIDE_MENU) {
+                    closeMenu();
+                }
+                break;
 
         }
         return false;
@@ -112,7 +130,7 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
             SIDE_MENU = false;
             closeMenu();
         }
-        if(keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN){
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
             GuidedActivity.launch(this,
                     getString(R.string.exit_title),
                     getString(R.string.exit_message),
@@ -133,22 +151,22 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
      */
     private void switchToLastSelectedMenu() {
         switch (selectedMenu) {
-            case Constants.MENU_SEARCH :
+            case Constants.MENU_SEARCH:
                 binding.btnSearch.requestFocus();
                 break;
-            case Constants.MENU_HOME :
+            case Constants.MENU_HOME:
                 binding.btnHome.requestFocus();
                 break;
-            case Constants.MENU_MOVIE :
+            case Constants.MENU_MOVIE:
                 binding.btnMovie.requestFocus();
                 break;
             case Constants.MENU_TV:
                 binding.btnTv.requestFocus();
                 break;
-            case Constants.MENU_PROFILE :
+            case Constants.MENU_PROFILE:
                 binding.btnProfile.requestFocus();
                 break;
-            case Constants.MENU_SETTINGS :
+            case Constants.MENU_SETTINGS:
                 binding.btnSettings.requestFocus();
                 break;
         }
@@ -156,6 +174,7 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
 
     /**
      * Change fragment
+     *
      * @param fragment fragment
      */
     private void changeFragment(Fragment fragment) {
@@ -170,7 +189,7 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
         Animation animSlide = AnimationUtils.loadAnimation(this, R.anim.slide_in_left);
         binding.navigationBar.startAnimation(animSlide);
         binding.navigationBar.requestLayout();
-        binding.navigationBar.getLayoutParams().width = DisplayUtils.getScreenWidth(this, 14);
+        binding.navigationBar.getLayoutParams().width = Common.dp2px(this, 120);
     }
 
     /**
@@ -178,7 +197,7 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
      */
     private void closeMenu() {
         binding.navigationBar.requestLayout();
-        binding.navigationBar.getLayoutParams().width = DisplayUtils.getScreenWidth(this, 5);
+        binding.navigationBar.getLayoutParams().width = Common.dp2px(this, 50);
         SIDE_MENU = false;
     }
 
@@ -188,6 +207,7 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
         lastSelectedMenu = view;
         view.setActivated(true);
         view.requestFocus();
+
         if (view.getId() == R.id.btn_search) {
             selectedMenu = Constants.MENU_SEARCH;
             changeFragment(new SearchFragment());
@@ -199,7 +219,7 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
             changeFragment(new MovieFragment());
         } else if (view.getId() == R.id.btn_tv) {
             selectedMenu = Constants.MENU_TV;
-            changeFragment(new GridFragment());
+            changeFragment(new TvFragment());
         } else if (view.getId() == R.id.btn_settings) {
             selectedMenu = Constants.MENU_SETTINGS;
             startActivity(new Intent(this, SettingsActivity.class));
@@ -207,5 +227,15 @@ public class MainActivity extends BaseActivity implements View.OnKeyListener, Vi
             selectedMenu = Constants.MENU_PROFILE;
             changeFragment(new ProfileFragment());
         }
+    }
+
+    @Override
+    public void onInitComplete(String message) {
+        runOnUiThread(() -> {
+            lastSelectedMenu = binding.btnHome;
+            lastSelectedMenu.setActivated(true);
+            lastSelectedMenu.requestFocus();
+            changeFragment(new HomeFragment());
+        });
     }
 }

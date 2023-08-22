@@ -7,8 +7,8 @@
     android:background="@drawable/selector_menu">
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/item_text"
-        android:layout_width="118dp"
-        android:layout_height="38dp"
+        android:layout_width="88dp"
+        android:layout_height="35dp"
         android:gravity="center"
         android:layout_centerInParent="true"/>
 </RelativeLayout>

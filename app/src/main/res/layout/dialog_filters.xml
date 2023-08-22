@@ -18,8 +18,10 @@
             android:gravity="center"/>
         <FrameLayout
             android:id="@+id/filters_frame_genre"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:nextFocusRight="@id/filters_frame_region"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="0dp"
@@ -36,8 +38,11 @@
             android:gravity="center"/>
         <FrameLayout
             android:id="@+id/filters_frame_region"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:nextFocusLeft="@id/filters_frame_genre"
+            android:nextFocusRight="@id/filters_frame_year"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="0dp"
@@ -54,8 +59,11 @@
             android:gravity="center"/>
         <FrameLayout
             android:id="@+id/filters_frame_year"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:nextFocusLeft="@id/filters_frame_region"
+            android:nextFocusRight="@id/filters_frame_rating"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="0dp"
@@ -72,8 +80,11 @@
             android:gravity="center"/>
         <FrameLayout
             android:id="@+id/filters_frame_rating"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:nextFocusLeft="@id/filters_frame_year"
+            android:nextFocusRight="@id/filters_frame_audio"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="0dp"
@@ -90,8 +101,10 @@
             android:gravity="center"/>
         <FrameLayout
             android:id="@+id/filters_frame_audio"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:nextFocusLeft="@id/filters_frame_rating"/>
     </LinearLayout>
 
 </LinearLayout>

@@ -14,6 +14,8 @@ import com.bumptech.glide.Glide;
 
 import org.tvapp.R;
 import org.tvapp.databinding.ItemVideoCardBinding;
+import org.tvapp.db.bean.TagVideo;
+import org.tvapp.db.bean.VideoJoin;
 import org.tvapp.model.DataModel;
 import org.tvapp.ui.detail.DetailActivity;
 
@@ -39,8 +41,8 @@ public class ImageCardPresenter extends Presenter {
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
-        if(item instanceof DataModel.Detail){
-            DataModel.Detail content = (DataModel.Detail) item;
+        if(item instanceof VideoJoin){
+            VideoJoin content = (VideoJoin) item;
             ImageCardView imageCardView = binding.videoCard;
             imageCardView.setCardType(ImageCardView.CARD_TYPE_FLAG_IMAGE_ONLY);
             imageCardView.setInfoVisibility(ImageCardView.CARD_REGION_VISIBLE_ACTIVATED);
@@ -57,7 +59,7 @@ public class ImageCardPresenter extends Presenter {
             }
             imageCardView.setMainImageDimensions(width, height);
             binding.tvCardTitle.setWidth(width);
-            String url = "https://www.themoviedb.org/t/p/w500" + content.getPoster_path();
+            String url =  content.getVideoPic().replace("http://", "https://");
             Glide.with(context).load(url).into(imageCardView.getMainImageView());
             binding.tvCardTitle.setText(content.getTitle());
         }
@@ -66,10 +68,8 @@ public class ImageCardPresenter extends Presenter {
             if (context instanceof DetailActivity) {
                 ((DetailActivity) context).finish();
             }
-            Intent intent = new Intent(context, DetailActivity.class);
-            assert item instanceof DataModel.Detail;
-            intent.putExtra("data", (Serializable) (DataModel.Detail) item);
-            context.startActivity(intent);
+            assert item instanceof VideoJoin;
+            DetailActivity.launch(context, ((VideoJoin) item).getVideoId());
         });
     }
 

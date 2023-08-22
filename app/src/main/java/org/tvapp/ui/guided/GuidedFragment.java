@@ -83,6 +83,8 @@ public class GuidedFragment extends GuidedStepSupportFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         view.post(() -> {
+            getActionItemView(0).setActivated(true);
+            getActionItemView(0).requestFocus();
             for (int i = 0; i < actionList.length; i++) {
                 View itemView = getActionItemView(i);
                 itemView.setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.selector_menu));

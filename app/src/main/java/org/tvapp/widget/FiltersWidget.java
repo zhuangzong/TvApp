@@ -2,6 +2,8 @@ package org.tvapp.widget;
 
 
 import android.content.Context;
+import android.view.FocusFinder;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.widget.FrameLayout;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.FocusHighlight;
 import androidx.leanback.widget.VerticalGridPresenter;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -20,6 +23,7 @@ import org.tvapp.presenter.CategoryPresenter;
 import org.tvapp.presenter.CustomVerticalGridPresenter;
 import org.tvapp.utils.Common;
 import org.tvapp.utils.DisplayUtils;
+import org.tvapp.utils.LogUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -54,6 +58,7 @@ public class FiltersWidget {
         setGridView(2);
         setGridView(3);
         setGridView(4);
+
     }
     private void setGridView(int columnIndex) {
         int selectIndex = 0;
@@ -87,7 +92,6 @@ public class FiltersWidget {
                 break;
         }
 
-
         CustomVerticalGridPresenter verticalGridPresenter = new CustomVerticalGridPresenter(FocusHighlight.ZOOM_FACTOR_MEDIUM, false);
         verticalGridPresenter.setNumberOfColumns(1);
         VerticalGridPresenter.ViewHolder mGridViewHolder = verticalGridPresenter.onCreateViewHolder(view);
@@ -99,7 +103,24 @@ public class FiltersWidget {
         categoryPresenter.setSelectedCategory(lists != null ? lists.get(selectIndex) : null);
         arrayObjectAdapter.addAll(0, lists);
         verticalGridPresenter.onBindViewHolder(mGridViewHolder, arrayObjectAdapter);
+        mGridViewHolder.getGridView().setPadding(10, 0, 10, 0);
 
+        mGridViewHolder.view.setOnKeyListener((v, keyCode, event) -> {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                switch (keyCode) {
+                    case KeyEvent.KEYCODE_DPAD_LEFT:
+                        if (mGridViewHolder.getGridView().getSelectedPosition() == 0) {
+
+                            return true;
+                        }
+                        break;
+                    case KeyEvent.KEYCODE_DPAD_RIGHT:
+
+                        break;
+                }
+            }
+            return false;
+        });
         List<String> finalLists = lists;
         verticalGridPresenter.setOnItemViewClickedListener((itemViewHolder, item, rowViewHolder, row) -> {
             categoryPresenter.setSelectedCategory((String) item);
@@ -109,6 +130,7 @@ public class FiltersWidget {
                 if(keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP){
                     onFilterListener.onFilter(mSelectedGenre, mSelectedRegion, mSelectedYear, mSelectedRating, mSelectedAudio);
                 }
+
                 return false;
             });
             switch (columnIndex) {
@@ -129,6 +151,8 @@ public class FiltersWidget {
                     break;
             }
         });
+
+
     }
 
     public interface OnFilterListener {

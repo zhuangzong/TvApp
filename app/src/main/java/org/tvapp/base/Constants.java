@@ -4,9 +4,11 @@ package org.tvapp.base;
 public class Constants {
 
     // tag name
-    public static final String TAG = "VideoCloud";
+    public static final String TAG = "kang";
     // db name
     public static final String DB_NAME = "video.db";
+    // shared preferences name
+    public static final String PREF_NAME = "tvapp";
     // db check type
     public static final String DB_CHECK_TYPE = "";
     // app check type
@@ -57,6 +59,6 @@ public class Constants {
     public static final String EXTRA_ICON = "icon";
     public static final String EXTRA_NO_BACKGROUND = "noBackground";
     public static final String EXTRA_BREADCRUMB = "breadcrumb";
-
+    public static final String PREF_FAVORITE = "favorite";
 
 }

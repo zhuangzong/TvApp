@@ -7,7 +7,11 @@ import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRow;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import org.tvapp.base.Constants;
+import org.tvapp.db.bean.ListResult;
+import org.tvapp.db.bean.VideoDetailInfo;
 import org.tvapp.model.DataModel;
 import org.tvapp.presenter.ImageCardPresenter;
 
@@ -33,13 +37,37 @@ public class Common {
         }
     }
 
-    public static ListRow createListRow( String headerName, List<DataModel.Detail> items) {
-        ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new ImageCardPresenter(true));
-        for (int i = 0; i < items.size(); i++) {
-            listRowAdapter.add(items.get(i));
+    public static int dp2px(Context context, int dp) {
+        return (int) (context.getResources().getDisplayMetrics().density * dp + 0.5f);
+    }
+
+    public static boolean isFavorite(Context context, int videoId){
+        List<String> favoriteList = getFavoriteList(context);
+        return favoriteList.contains(String.valueOf(videoId));
+    }
+
+    public static List<String> getFavoriteList(Context context){
+        String favorite = PreferencesUtils.getString(context,Constants.PREF_FAVORITE,null);
+        if(favorite == null){
+            return new ArrayList<>();
         }
-        HeaderItem header = new HeaderItem(0, headerName);
-        return new ListRow(header, listRowAdapter);
+        return new Gson().fromJson(favorite, new TypeToken<List<String>>(){}.getType());
+    }
+
+    public static void addFavorite(Context context, int videoId){
+        List<String> favoriteList = getFavoriteList(context);
+        if(!favoriteList.contains(String.valueOf(videoId))){
+            favoriteList.add(String.valueOf(videoId));
+            PreferencesUtils.putString(context,Constants.PREF_FAVORITE,new Gson().toJson(favoriteList));
+        }
+    }
+
+    public static void removeFavorite(Context context, int videoId){
+        List<String> favoriteList = getFavoriteList(context);
+        if(favoriteList.contains(String.valueOf(videoId))){
+            favoriteList.remove(String.valueOf(videoId));
+            PreferencesUtils.putString(context,Constants.PREF_FAVORITE,new Gson().toJson(favoriteList));
+        }
     }
 
     public static List<String> getGenreList(){

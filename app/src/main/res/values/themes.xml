@@ -4,7 +4,7 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Leanback</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@color/bg_grey</item>
-        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
     </style>
 
     <style name="TransparentActivityTheme" parent="Base.Theme.TvApp">
@@ -13,6 +13,11 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <!--RatingBar颜色-->
+    <style name="RatingBar" parent="Theme.AppCompat">
+        <item name="colorControlNormal">@color/color_grey</item>
+        <item name="colorControlActivated">@color/gold</item>
+    </style>
 
     <style name="Theme.TvApp" parent="Base.Theme.TvApp" />
 

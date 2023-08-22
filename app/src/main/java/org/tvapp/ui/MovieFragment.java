@@ -3,33 +3,43 @@ package org.tvapp.ui;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.FocusHighlight;
 import androidx.leanback.widget.VerticalGridPresenter;
 import androidx.viewbinding.ViewBinding;
+
+import com.google.gson.Gson;
+
 import org.tvapp.base.BaseFragment;
 import org.tvapp.databinding.FragmentMovieBinding;
-import org.tvapp.model.DataModel;
+import org.tvapp.db.DatabaseHelper;
+import org.tvapp.db.bean.BaseResult;
+import org.tvapp.db.bean.ListResult;
+import org.tvapp.db.bean.ParamStruct;
+import org.tvapp.db.bean.TagVideo;
+import org.tvapp.db.bean.VideoJoin;
+import org.tvapp.db.callback.OnGetRecommendListCallback;
 import org.tvapp.presenter.CustomVerticalGridPresenter;
 import org.tvapp.presenter.ImageCardPresenter;
 import org.tvapp.presenter.CategoryPresenter;
-import org.tvapp.utils.Common;
+import org.tvapp.utils.LogUtils;
 import org.tvapp.widget.FiltersWidget;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 
-public class MovieFragment extends BaseFragment {
+public class MovieFragment extends BaseFragment implements OnGetRecommendListCallback {
 
     private FragmentMovieBinding binding;
-    private DataModel dataModel;
     private final ArrayObjectAdapter adapter = new ArrayObjectAdapter(new ImageCardPresenter(true));
     private final CustomVerticalGridPresenter verticalGridPresenter = new CustomVerticalGridPresenter(FocusHighlight.ZOOM_FACTOR_MEDIUM, false);
-    private VerticalGridPresenter.ViewHolder mGridViewHolder;
-
+    private ArrayObjectAdapter categoryAdapter;
+    private final CategoryPresenter categoryPresenter = new CategoryPresenter();
+    private ListResult result;
     private int selectedGenre = 0;
     private int selectedRegion = 0;
     private int selectedYear = 0;
@@ -45,43 +55,52 @@ public class MovieFragment extends BaseFragment {
     @Override
     public void initView() {
         super.initView();
-        dataModel = Common.getData(requireContext());
         initCategory();
         initMovies();
     }
 
+    @Override
+    public void initData() {
+        super.initData();
+        ParamStruct paramStruct = new ParamStruct();
+        paramStruct.setPage(1);
+        paramStruct.setPageSize(100);
+        paramStruct.setCategoryId(2);
+        new DatabaseHelper
+                .Builder(requireContext())
+                .setOnGetRecommendListCallback(this).build()
+                .callGetRecommendList(new Gson().toJson(paramStruct));
+    }
+
     private void initCategory() {
-        List<String> titles = dataModel.getResult().stream().map(DataModel.Result::getTitle).collect(Collectors.toList());
-        CustomVerticalGridPresenter verticalGridPresenter = new CustomVerticalGridPresenter(FocusHighlight.ZOOM_FACTOR_MEDIUM, false);
+        CustomVerticalGridPresenter verticalGridPresenter = new CustomVerticalGridPresenter(FocusHighlight.ZOOM_FACTOR_LARGE, false);
         verticalGridPresenter.setNumberOfColumns(1);
         VerticalGridPresenter.ViewHolder mGridViewHolder = verticalGridPresenter.onCreateViewHolder(binding.frameCategory);
-        CategoryPresenter categoryPresenter = new CategoryPresenter();
-        ArrayObjectAdapter arrayObjectAdapter = new ArrayObjectAdapter(categoryPresenter);
 
+        categoryAdapter = new ArrayObjectAdapter(categoryPresenter);
         binding.frameCategory.addView(mGridViewHolder.view, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-        verticalGridPresenter.onBindViewHolder(mGridViewHolder, arrayObjectAdapter);
-        categoryPresenter.setSelectedCategory(titles.get(0));
-        arrayObjectAdapter.addAll(0, titles);
+        verticalGridPresenter.onBindViewHolder(mGridViewHolder, categoryAdapter);
+
         verticalGridPresenter.setOnItemViewClickedListener((itemViewHolder, item, rowViewHolder, row) -> {
             categoryPresenter.setSelectedCategory((String) item);
-            arrayObjectAdapter.notifyItemRangeChanged(0, arrayObjectAdapter.size());
-            setGridData(dataModel.getResult().stream()
-                    .filter(result -> result.getTitle().equals(item))
-                    .collect(Collectors.toList()).get(0).getDetails());
+            categoryAdapter.notifyItemRangeChanged(0, categoryAdapter.size());
+            setGridData(result.getList().stream()
+                    .filter(result -> result.getTagTitle().equals(item))
+                    .collect(Collectors.toList()).get(0).getVideoList());
         });
     }
 
     private void initMovies() {
         verticalGridPresenter.setNumberOfColumns(6);
-        mGridViewHolder = verticalGridPresenter.onCreateViewHolder(binding.frameContainer);
+        VerticalGridPresenter.ViewHolder mGridViewHolder = verticalGridPresenter.onCreateViewHolder(binding.frameContainer);
         binding.frameContainer.addView(mGridViewHolder.view, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-        setGridData(dataModel.getResult().get(0).getDetails());
+        verticalGridPresenter.onBindViewHolder(mGridViewHolder, adapter);
     }
 
-    private void setGridData(List<DataModel.Detail> results) {
+    private void setGridData(List<VideoJoin> results) {
         adapter.clear();
         adapter.addAll(0, results);
-        verticalGridPresenter.onBindViewHolder(mGridViewHolder, adapter);
+        adapter.notifyItemRangeChanged(0, adapter.size());
     }
 
     @Override
@@ -106,5 +125,24 @@ public class MovieFragment extends BaseFragment {
     }
 
 
-
+    @Override
+    public void onGetRecommendListComplete(String message) {
+        requireActivity().runOnUiThread(() -> {
+            Gson gson = new Gson();
+            BaseResult baseResult = gson.fromJson(message, BaseResult.class);
+            if (baseResult.getCode().equals("0000")) {
+                result = gson.fromJson(gson.toJson(baseResult.getData()), ListResult.class);
+                if (result.getList() != null && result.getList().size() > 0) {
+                    List<String> tags = result.getList().stream().map(TagVideo::getTagTitle).collect(Collectors.toList());
+                    categoryPresenter.setSelectedCategory(tags.get(0));
+                    categoryAdapter.addAll(0, tags);
+                    categoryAdapter.notifyItemRangeChanged(0, categoryAdapter.size());
+                    setGridData(result.getList().get(0).getVideoList());
+                }
+            } else {
+                LogUtils.e("onGetRecommendListComplete: " + baseResult.getMsg());
+                Toast.makeText(requireContext(), baseResult.getMsg(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 }

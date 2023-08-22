@@ -1,8 +1,6 @@
 package org.tvapp.ui.playback;
 
 
-import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -10,18 +8,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityOptionsCompat;
 import androidx.leanback.app.VideoSupportFragment;
 import androidx.leanback.app.VideoSupportFragmentGlueHost;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.ClassPresenterSelector;
 import androidx.leanback.widget.HeaderItem;
-import androidx.leanback.widget.ImageCardView;
 import androidx.leanback.widget.ListRow;
-import androidx.leanback.widget.ListRowPresenter;
-import androidx.leanback.widget.OnItemViewClickedListener;
-import androidx.leanback.widget.Presenter;
-import androidx.leanback.widget.RowPresenter;
 
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
@@ -31,17 +23,24 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.util.Util;
+import com.google.gson.Gson;
 
-import org.tvapp.model.DataModel;
+import org.tvapp.base.Constants;
+import org.tvapp.db.DatabaseHelper;
+import org.tvapp.db.bean.BaseResult;
+import org.tvapp.db.bean.ListResult;
+import org.tvapp.db.bean.ParamStruct;
+import org.tvapp.db.bean.TagVideo;
+import org.tvapp.db.bean.VideoDetailInfo;
+import org.tvapp.db.callback.OnGetRecommendListCallback;
 import org.tvapp.presenter.CustomListRowPresenter;
 import org.tvapp.presenter.ImageCardPresenter;
-import org.tvapp.utils.Common;
 import org.tvapp.utils.VideoPlayerGlue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlaybackFragment extends VideoSupportFragment {
+public class PlaybackFragment extends VideoSupportFragment implements OnGetRecommendListCallback {
     private static final int UPDATE_DELAY = 16;
 
     private VideoPlayerGlue mPlayerGlue;
@@ -55,13 +54,17 @@ public class PlaybackFragment extends VideoSupportFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        DataModel.Detail mVideo = (DataModel.Detail) (getArguments() != null ? getArguments().getSerializable("data") : null);
+        VideoDetailInfo mVideo = (VideoDetailInfo) (getArguments() != null ? getArguments().getSerializable(Constants.EXTRA_VIDEO) : null);
         mPlaylist = new Playlist();
         mPlaylist.add(mVideo);
-        DataModel dataList = Common.getData(requireActivity());
-        for (int i = 0; i < dataList.getResult().get(0).getDetails().size(); i++) {
-            mPlaylist.add(dataList.getResult().get(0).getDetails().get(i));
-        }
+        ParamStruct paramStruct = new ParamStruct();
+        paramStruct.setCategoryId(1);
+        paramStruct.setPage(1);
+        paramStruct.setPageSize(1);
+        new DatabaseHelper.Builder(requireContext())
+                .setOnGetRecommendListCallback(this)
+                .build()
+                .callGetRecommendList(new Gson().toJson(paramStruct));
     }
 
     @Override
@@ -127,12 +130,12 @@ public class PlaybackFragment extends VideoSupportFragment {
         ClassPresenterSelector presenterSelector = new ClassPresenterSelector();
         presenterSelector.addClassPresenter(
                 mPlayerGlue.getControlsRow().getClass(), mPlayerGlue.getPlaybackRowPresenter());
-        presenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
+        presenterSelector.addClassPresenter(ListRow.class, new CustomListRowPresenter());
 
         ArrayObjectAdapter rowsAdapter = new ArrayObjectAdapter(presenterSelector);
 
         rowsAdapter.add(mPlayerGlue.getControlsRow());
-        for (DataModel.Detail detail : mPlaylist.playlist){
+        for (VideoDetailInfo detail : mPlaylist.playlist){
             mVideoCursorAdapter.add(detail);
         }
         HeaderItem header = new HeaderItem("Related Videos");
@@ -141,11 +144,11 @@ public class PlaybackFragment extends VideoSupportFragment {
         return rowsAdapter;
     }
 
-    private void play(DataModel.Detail video) {
+    private void play(VideoDetailInfo video) {
         if(video!=null){
             mPlayerGlue.setTitle(video.getTitle());
-            mPlayerGlue.setSubtitle(video.getOverview());
-            prepareMediaForPlaying(Uri.parse("https://pass-1305950406.cos.ap-guangzhou.myqcloud.com/video/124mb.mp4"));
+            mPlayerGlue.setSubtitle(video.getPlotSummary());
+            prepareMediaForPlaying(Uri.parse(video.getVideoUrl()));
             mPlayerGlue.play();
         }else {
             Toast.makeText(requireContext(), "No more videos", Toast.LENGTH_SHORT).show();
@@ -169,9 +172,18 @@ public class PlaybackFragment extends VideoSupportFragment {
     }
 
     private void prepareMediaForPlaying(Uri mediaSourceUri) {
-        MediaSource mediaSource = new DefaultMediaSourceFactory(getActivity())
+        MediaSource mediaSource = new DefaultMediaSourceFactory(requireContext())
                 .createMediaSource(MediaItem.fromUri(mediaSourceUri));
         mPlayer.setMediaSource(mediaSource);
+    }
+
+    @Override
+    public void onGetRecommendListComplete(String message) {
+        BaseResult baseResult = new Gson().fromJson(message, BaseResult.class);
+        if (baseResult.getCode().equals("0000")) {
+            TagVideo details = new Gson().fromJson(new Gson().toJson(baseResult.getData()), ListResult.class).getList().get(0);
+            mVideoCursorAdapter.addAll(0, details.getVideoList());
+        }
     }
 
     class PlaylistActionListener implements VideoPlayerGlue.OnActionClickedListener {
@@ -194,7 +206,7 @@ public class PlaybackFragment extends VideoSupportFragment {
     }
 
     static class Playlist{
-        private final List<DataModel.Detail> playlist;
+        private final List<VideoDetailInfo> playlist;
         private int currentPosition;
 
         public Playlist() {
@@ -214,7 +226,7 @@ public class PlaybackFragment extends VideoSupportFragment {
          *
          * @param video to be added to the playlist.
          */
-        public void add(DataModel.Detail video) {
+        public void add(VideoDetailInfo video) {
             playlist.add(video);
         }
 
@@ -241,7 +253,7 @@ public class PlaybackFragment extends VideoSupportFragment {
          *
          * @return The next video in the playlist.
          */
-        public DataModel.Detail next() {
+        public VideoDetailInfo next() {
             if ((currentPosition + 1) < size()) {
                 currentPosition++;
                 return playlist.get(currentPosition);
@@ -255,7 +267,7 @@ public class PlaybackFragment extends VideoSupportFragment {
          *
          * @return The previous video in the playlist.
          */
-        public DataModel.Detail previous() {
+        public VideoDetailInfo previous() {
             if (currentPosition - 1 >= 0) {
                 currentPosition--;
                 return playlist.get(currentPosition);

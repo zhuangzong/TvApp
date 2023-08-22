@@ -13,12 +13,21 @@ import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.ObjectAdapter;
 
+import com.google.gson.Gson;
+
+import org.tvapp.db.DatabaseHelper;
+import org.tvapp.db.bean.BaseResult;
+import org.tvapp.db.bean.ListResult;
+import org.tvapp.db.bean.ParamStruct;
+import org.tvapp.db.bean.SearchResult;
+import org.tvapp.db.callback.OnVideoSearchCallback;
 import org.tvapp.model.DataModel;
 import org.tvapp.presenter.CustomListRowPresenter;
 import org.tvapp.presenter.ImageCardPresenter;
 import org.tvapp.utils.Common;
+import org.tvapp.utils.LogUtils;
 
-public class SearchFragment extends SearchSupportFragment implements SearchSupportFragment.SearchResultProvider {
+public class SearchFragment extends SearchSupportFragment implements SearchSupportFragment.SearchResultProvider, OnVideoSearchCallback {
 
     ArrayObjectAdapter mRowsAdapter;
 
@@ -43,15 +52,7 @@ public class SearchFragment extends SearchSupportFragment implements SearchSuppo
 
     @Override
     public boolean onQueryTextChange(String newQuery) {
-//        if (!TextUtils.isEmpty(newQuery) && !newQuery.equals("nil")) {
-//            newQuery = "%" + newQuery + "%";
-//        }
-//        DataModel dataList = Common.getData(requireActivity());
-//        ArrayObjectAdapter adapterRows = new ArrayObjectAdapter(new ImageCardPresenter(false));
-//        adapterRows.addAll(0, dataList.getResult().get(0).getDetails());
-//        HeaderItem headerItem = new HeaderItem("Search Result");
-//        ListRow listRow = new ListRow(headerItem, adapterRows);
-//        mRowsAdapter.add(listRow);
+
         return true;
     }
 
@@ -60,13 +61,29 @@ public class SearchFragment extends SearchSupportFragment implements SearchSuppo
         if (!TextUtils.isEmpty(query) && !query.equals("nil")) {
             query = "%" + query + "%";
         }
-        mRowsAdapter.clear();
-        DataModel dataList = Common.getData(requireActivity());
-        ArrayObjectAdapter adapterRows = new ArrayObjectAdapter(new ImageCardPresenter(false));
-        adapterRows.addAll(0, dataList.getResult().get(0).getDetails());
-        HeaderItem headerItem = new HeaderItem("Search Result");
-        ListRow listRow = new ListRow(headerItem, adapterRows);
-        mRowsAdapter.add(listRow);
+        ParamStruct paramStruct = new ParamStruct();
+        paramStruct.setTitle(query);
+        new DatabaseHelper.Builder(requireActivity())
+                .setOnVideoSearchCallback(this)
+                        .build()
+                                .callVideoSearch(new Gson().toJson(paramStruct));
+
         return true;
+    }
+
+    @Override
+    public void onVideoSearchComplete(String message) {
+        LogUtils.d( message);
+        BaseResult baseResult = new Gson().fromJson(message, BaseResult.class);
+        if (baseResult.getCode().equals("0000")) {
+
+            SearchResult searchResult = new Gson().fromJson(new Gson().toJson(baseResult.getData()), SearchResult.class);
+            mRowsAdapter.clear();
+            ArrayObjectAdapter adapterRows = new ArrayObjectAdapter(new ImageCardPresenter(false));
+            adapterRows.addAll(0, searchResult.getMovies());
+            HeaderItem headerItem = new HeaderItem("Search Result");
+            ListRow listRow = new ListRow(headerItem, adapterRows);
+            mRowsAdapter.add(listRow);
+        }
     }
 }
